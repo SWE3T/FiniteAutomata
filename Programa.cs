@@ -2,6 +2,7 @@
 using System.Data;
 using System.Diagnostics;
 using Microsoft.VisualBasic.FileIO;
+using System.Text.RegularExpressions;
 
 namespace DETERMINADOR
 {
@@ -20,17 +21,20 @@ namespace DETERMINADOR
 
             var lines = File.ReadAllLines(filename);
 
-            int i = 0;
             Console.WriteLine("\nLeitura do Arquivo: ");
-            foreach (var line in lines)
+
+            for (var line = 0; line < lines.Length - 1; line++)
             {
-                Console.WriteLine(line);
+                if (Regex.IsMatch(lines[line], @"[a-z]+")) //caso o caractere seja um simbolo
+                {
+                    Console.WriteLine(lines[line]); // Debug
+                }
             }
         }
 
-        private static void showTable()
+        private static void determinize()
         {
-            Console.WriteLine("Função ShowTable");
+            Console.WriteLine("Função De Determinação");
         }
     }
 }
