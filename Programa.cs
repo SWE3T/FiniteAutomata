@@ -19,11 +19,14 @@ namespace DETERMINADOR
         {
             string filename = @"Entrada.txt";
 
-            string[,] AFND = new string[3, 3]
+            string[,] AFND = new string[6, 6]
             {
-                { "Start", "s", "e" },
-                { "S", "A, C", "H" },
-                { "A", " ", "B" }
+                { "Start", "s", "e", "n", "a", "o" },
+                { "S", "A, C", "H", " ",  "K", " " },
+                { "A",   " ",  "B", " ",  " ", " " },
+                { "B",   " ",  " ", " ",  " ", " " },
+                { "C",   " ",  "D", " ",  " ", " " },
+                { "D",   " ",  " ", "E",  " ", " " },
             };
 
             var lines = File.ReadAllLines(filename);
@@ -47,10 +50,31 @@ namespace DETERMINADOR
                     }
                     else
                     { //É uma palavra reservada
+                        bool symbolExists = false;
                         Console.WriteLine("Palavra reservada");
                         //ResizeArray(ref AFND, AFND.GetUpperBound(0) + 1);    //Função para aumentar o tamanho da matriz
+                        int mark = 0;
+                        for (var symbol = 1; symbol < AFND.GetUpperBound(0)+1; symbol++) //primeiro simbolo
+                        {
+                            //Console.Write(AFND[0, symbol][0]);
+                            //Console.WriteLine(lines[line][0]);
+                            if (AFND[0, symbol][0] == lines[line][0]) //Se o primeiro simbolo já existe na matrix
+                            {
+                                symbolExists = true;
+                                mark = symbol;
+                            }
+                        }
+                        //Console.WriteLine(symbolExists);
+                        if (symbolExists)
+                        {
+                            AFND[1, mark] = AFND[1, mark] + "{N. E.}";
+                        }
+                        else
+                        {
+                            //aumentar o tamanho da matrix, adicionar o simbolo    
+                        }
+                        //se symbolExists for false, cria um novo simbolo na tabela
 
-                        //verificar se Console.Write(lines[line][0]); existe,
                         //adicionar um novo estado a 'S', e criar um novo estado para cada letra seguinte dessa palavra
                     }
                 }
