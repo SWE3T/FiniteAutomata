@@ -22,11 +22,11 @@ namespace DETERMINADOR
             string[,] AFND = new string[6, 6]
             {
                 { "Start", "s", "e", "n", "a", "o" },
-                { "S", "A, C", "H", " ",  "K", " " },
-                { "A",   " ",  "B", " ",  " ", " " },
-                { "B",   " ",  " ", " ",  " ", " " },
-                { "C",   " ",  "D", " ",  " ", " " },
-                { "D",   " ",  " ", "E",  " ", " " },
+                { "S", "A, C", "H", " ", "K", " " },
+                { "A", " ", "B", " ", " ", " " },
+                { "B", " ", " ", " ", " ", " " },
+                { "C", " ", "D", " ", " ", " " },
+                { "D", " ", " ", "E", " ", " " },
             };
 
             var lines = File.ReadAllLines(filename);
@@ -37,7 +37,7 @@ namespace DETERMINADOR
             {
                 if (Regex.IsMatch(lines[line], @"[a-zã]+")) //Caso o caractere seja um simbolo
                 {
-                    Console.WriteLine(lines[line]); // Printa o arquivo
+                    Console.WriteLine(lines[line]); // Printa a linha
 
                     if (lines[line].Split("::=").Length == 2)
                     { //Parte de um estado
@@ -50,30 +50,37 @@ namespace DETERMINADOR
                     }
                     else
                     { //É uma palavra reservada
-                        bool symbolExists = false;
                         Console.WriteLine("Palavra reservada");
                         //ResizeArray(ref AFND, AFND.GetUpperBound(0) + 1);    //Função para aumentar o tamanho da matriz
-                        int mark = 0;
-                        for (var symbol = 1; symbol < AFND.GetUpperBound(0)+1; symbol++) //primeiro simbolo
+                        int mark = 0, stateHandlerCounter = 0;
+                        for (var symbol = 1; symbol < AFND.GetUpperBound(0) + 1; symbol++) //primeiro simbolo
                         {
                             //Console.Write(AFND[0, symbol][0]);
                             //Console.WriteLine(lines[line][0]);
                             if (AFND[0, symbol][0] == lines[line][0]) //Se o primeiro simbolo já existe na matrix
                             {
-                                symbolExists = true;
-                                mark = symbol;
+                                AFND[1, symbol] = AFND[1, symbol] + ", " + (char)(65 + stateHandlerCounter);
+                                //Vou para a segunda letra da palavra reservada
+                                foreach (var letter in lines[line].Skip(1))
+                                {
+                                    Console.Write(letter);
+                                    Console.WriteLine("Tem que processar essa parte!");
+                                }
+                            }
+                            else
+                            {
+                                //ResizeArray(ref AFND, AFND.GetUpperBound(0) + 1); //Função para aumentar o tamanho da matriz
+                                //AFND[1, AFND.GetUpperBound(0)] = AFND[1, mark] = AFND[1, mark];
+                                //aumentar o tamanho da matrix, adicionar o simbolo
                             }
                         }
                         //Console.WriteLine(symbolExists);
-                        if (symbolExists)
-                        {
-                            AFND[1, mark] = AFND[1, mark] + "{N. E.}";
-                        }
-                        else
-                        {
-                            //aumentar o tamanho da matrix, adicionar o simbolo    
-                        }
-                        //se symbolExists for false, cria um novo simbolo na tabela
+                        // if (symbolExists)
+                        // {
+                        //     AFND[1, mark] = AFND[1, mark] + ", " + (char)(65 + stateHandlerCounter);
+                        //     //ResizeArray(ref AFND, AFND.GetUpperBound(0) + 1);    //Função para aumentar o tamanho da matriz
+
+                        // }
 
                         //adicionar um novo estado a 'S', e criar um novo estado para cada letra seguinte dessa palavra
                     }
