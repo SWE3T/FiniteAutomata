@@ -3,6 +3,7 @@ using System.Data;
 using System.Diagnostics;
 using Microsoft.VisualBasic.FileIO;
 using System.Text.RegularExpressions;
+using System.Linq;
 
 namespace DETERMINADOR
 {
@@ -19,23 +20,30 @@ namespace DETERMINADOR
         {
             string filename = @"Entrada.txt";
 
-            string[,] AFND = new string[6, 6]
+            // string[,] AFND = new string[6, 6]
+            // {
+            //     { "57437", "s", "e", "n", "ã", "o" },
+            //     { "S", "A, C", "H", " ", "K", " " },
+            //     { "A", " ", "B", " ", " ", " " },
+            //     { "B", " ", " ", " ", " ", " " },
+            //     { "C", " ", "D", " ", " ", " " },
+            //     { "D", " ", " ", "E", " ", " " },
+            // };
+            
+            string[,] AFND = new string[2, 1]
             {
-                { "Start", "s", "e", "n", "a", "o" },
-                { "S", "A, C", "H", " ", "K", " " },
-                { "A", " ", "B", " ", " ", " " },
-                { "B", " ", " ", " ", " ", " " },
-                { "C", " ", "D", " ", " ", " " },
-                { "D", " ", " ", "E", " ", " " },
+                { "57437" },
+                { "S" },
             };
 
             var lines = File.ReadAllLines(filename);
 
             Console.WriteLine("\nLeitura do Arquivo: ");
+            int stateHandlerCounter = 0;
 
             for (var line = 0; line < lines.Length; line++)
             {
-                if (Regex.IsMatch(lines[line], @"[a-zã]+")) //Caso o caractere seja um simbolo
+                if (Regex.IsMatch(lines[line], @"[a-zã]+")) //Caso a linha seja válida seja um simbolo
                 {
                     Console.WriteLine(lines[line]); // Printa a linha
 
@@ -49,36 +57,47 @@ namespace DETERMINADOR
                         //replace  <X> por ' '; para separar os simbolos
                     }
                     else
-                    { //É uma palavra reservada
+                    { //Parte de uma palavra reservada
+                        //Console.WriteLine(AFND.GetLength(0)-1);
                         Console.WriteLine("Palavra reservada");
+                        string temp;
+                        //Console.WriteLine(temp);
+
                         //ResizeArray(ref AFND, AFND.GetUpperBound(0) + 1);    //Função para aumentar o tamanho da matriz
-                        int mark = 0, stateHandlerCounter = 0;
-                        for (var symbol = 1; symbol < AFND.GetUpperBound(0) + 1; symbol++) //primeiro simbolo
+                        for (var symbol = 0; symbol <= lines[line].Length - 1; symbol++) //Percore a palavra reservada
                         {
-                            //Console.Write(AFND[0, symbol][0]);
-                            //Console.WriteLine(lines[line][0]);
-                            if (AFND[0, symbol][0] == lines[line][0]) //Se o primeiro simbolo já existe na matrix
+                        temp = GetRow(AFND, 0, 1);
+
+                            if (temp.Contains(lines[line][symbol])) //Se o primeiro simbolo já existe na matrix
                             {
-                                AFND[1, symbol] = AFND[1, symbol] + ", " + (char)(65 + stateHandlerCounter);
-                                //Vou para a segunda letra da palavra reservada
-                                foreach (var letter in lines[line].Skip(1))
+                                 //AFND[1, symbol] = AFND[1, symbol] + ", " + (char)(65 + stateHandlerCounter);
+                                Console.WriteLine("O simbolo já existe na tabela");
+                                if (symbol == 0) //Caso seja o primeiro simbolo da palavra 
                                 {
-                                    Console.Write(letter);
-                                    Console.WriteLine("Tem que processar essa parte!");
+                                    string indexOfSymbol = string.Concat(temp.Where(c => !char.IsWhiteSpace(c)));
+                                    int indexOfSymbolOnTable = indexOfSymbol.IndexOf((lines[line][symbol]));
+                                    //Console.WriteLine(AFND[0, indexOfSymbolOnTable+1]);
+                                    AFND[1, indexOfSymbolOnTable+1] = AFND[1, indexOfSymbolOnTable+1] + (char)(65 + stateHandlerCounter) + ", ";
                                 }
+                                                            
                             }
                             else
                             {
-                                //ResizeArray(ref AFND, AFND.GetUpperBound(0) + 1); //Função para aumentar o tamanho da matriz
-                                //AFND[1, AFND.GetUpperBound(0)] = AFND[1, mark] = AFND[1, mark];
-                                //aumentar o tamanho da matrix, adicionar o simbolo
+                                Console.WriteLine("Não existe este simbolo na tabela");
+                                ResizeArray(ref AFND, AFND.GetLength(0), AFND.GetLength(1)+1); //Função para aumentar o tamanho da matriz
+                                AFND[0, AFND.GetLength(1)-1] = lines[line][symbol]+""; //Adiciona o simbolo no topo da matriz
+                            
+                                if (symbol == 0) //Caso seja o primeiro simbolo da palavra 
+                                {
+                                    AFND[1, AFND.GetLength(1)-1] = AFND[1, AFND.GetLength(1)-1] + (char)(65 + stateHandlerCounter) + ", ";
+                                }
                             }
                         }
-                        //Console.WriteLine(symbolExists);
+                        // Console.WriteLine(symbolExists);
                         // if (symbolExists)
                         // {
                         //     AFND[1, mark] = AFND[1, mark] + ", " + (char)(65 + stateHandlerCounter);
-                        //     //ResizeArray(ref AFND, AFND.GetUpperBound(0) + 1);    //Função para aumentar o tamanho da matriz
+                        //     //ResizeArray(ref AFND, AFND.GetLength(0) + 1);    //Função para aumentar o tamanho da matriz
 
                         // }
 
@@ -90,7 +109,7 @@ namespace DETERMINADOR
             Console.WriteLine("Printing AFND: ");
             for (int i = 0; i <= AFND.GetUpperBound(0); i++)
             {
-                for (int j = 0; j <= AFND.GetUpperBound(0); j++)
+                for (int j = 0; j <= AFND.GetUpperBound(1); j++)
                 {
                     Console.Write(AFND[i, j] + "\t|");
                 }
@@ -104,15 +123,22 @@ namespace DETERMINADOR
             Console.WriteLine("Função De Determinação");
         }
 
-        private static void ResizeArray(ref string[,] Arr, int x)
+        private static void ResizeArray(ref string[,] Arr, int x, int y)
         {
-            string[,] _arr = new string[x, 5];
-            int minRows = Math.Min(x, Arr.GetLength(0));
-            int minCols = Math.Min(5, Arr.GetLength(1));
-            for (int i = 0; i < minRows; i++)
-                for (int j = 0; j < minCols; j++)
+            string[,] _arr = new string[x, y];
+  
+            for (int i = 0; i < Arr.GetLength(0); i++)
+                for (int j = 0; j < Arr.GetLength(1); j++)
                     _arr[i, j] = Arr[i, j];
             Arr = _arr;
+        }
+
+        static string GetRow(string[,] matrix, int rowNumber, int trueORfalse)
+        {
+            string result = " ";
+            for (var i = trueORfalse; i < matrix.GetLength(1); i++)
+                result = result + " " + matrix[rowNumber, i];
+            return result;
         }
     }
 }
