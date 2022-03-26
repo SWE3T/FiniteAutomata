@@ -73,16 +73,18 @@ namespace DETERMINADOR
                                 string indexOfSymbol = string.Concat(temp.Where(c => !char.IsWhiteSpace(c)));
                                 int indexOfSymbolOnTable = indexOfSymbol.IndexOf((lines[line][symbol]));
 
-                                if (symbol == 0) //Caso seja o primeiro simbolo da palavra 
+                                if (symbol != 0) //Caso seja o primeiro simbolo da palavra 
                                 {
-                                    //Console.WriteLine(AFND[0, indexOfSymbolOnTable+1]);
-                                    AFND[1, indexOfSymbolOnTable+1] = AFND[1, indexOfSymbolOnTable+1] + (char)(65 + stateHandlerCounter) + ", ";
+                                    ResizeArray(ref AFND, AFND.GetLength(0)+1, AFND.GetLength(1)); //Função para aumentar o tamanho da matriz
+                                    AFND[stateHandlerCounter+2, 0] = (char)(65 + stateHandlerCounter)+"";
+                                    stateHandlerCounter++;
+                                    AFND[stateHandlerCounter+1, indexOfSymbolOnTable+1] = AFND[stateHandlerCounter+1, indexOfSymbolOnTable+1] + (char)(65 + stateHandlerCounter) + ", ";
                                 }
+                                  else
+                                  {
+                                    AFND[1, indexOfSymbolOnTable+1] = AFND[1, indexOfSymbolOnTable+1] + (char)(65 + stateHandlerCounter) + ", ";
+                                  }
                                
-                                ResizeArray(ref AFND, AFND.GetLength(0)+1, AFND.GetLength(1)); //Função para aumentar o tamanho da matriz
-                                AFND[stateHandlerCounter+2, 0] = (char)(65 + stateHandlerCounter)+"";
-                                stateHandlerCounter++;
-                                AFND[stateHandlerCounter+1, indexOfSymbolOnTable+1] = AFND[stateHandlerCounter+1, indexOfSymbolOnTable+1] + (char)(65 + stateHandlerCounter) + ", ";
                             }
                             else
                             {
@@ -90,22 +92,23 @@ namespace DETERMINADOR
                                 ResizeArray(ref AFND, AFND.GetLength(0), AFND.GetLength(1)+1); //Função para aumentar o tamanho da matriz
                                 AFND[0, AFND.GetLength(1)-1] = lines[line][symbol]+""; //Adiciona o simbolo no topo da matriz
                             
-                                if (symbol == 0) //Caso seja o primeiro simbolo da palavra 
+                                if (symbol != 0) //Caso seja o primeiro simbolo da palavra 
+                                {
+                                    ResizeArray(ref AFND, AFND.GetLength(0)+1, AFND.GetLength(1)); //Função para aumentar o tamanho da matriz
+                                    AFND[stateHandlerCounter+2, 0] = (char)(65 + stateHandlerCounter)+"";
+                                    stateHandlerCounter++;
+                                    AFND[stateHandlerCounter+1, AFND.GetLength(1)-1] = AFND[stateHandlerCounter+1, AFND.GetLength(1)-1] + (char)(65 + stateHandlerCounter) + ", ";
+                                }
+                                else
                                 {
                                     AFND[1, AFND.GetLength(1)-1] = AFND[1, AFND.GetLength(1)-1] + (char)(65 + stateHandlerCounter) + ", ";
                                 }
-                                
-                                ResizeArray(ref AFND, AFND.GetLength(0)+1, AFND.GetLength(1)); //Função para aumentar o tamanho da matriz
-                                AFND[stateHandlerCounter+2, 0] = (char)(65 + stateHandlerCounter)+"";
-                                stateHandlerCounter++;
-                                AFND[stateHandlerCounter+1, AFND.GetLength(1)-1] = AFND[stateHandlerCounter+1, AFND.GetLength(1)-1] + (char)(65 + stateHandlerCounter) + ", ";
                             }
                         }
                         
                         ResizeArray(ref AFND, AFND.GetLength(0)+1, AFND.GetLength(1)); //Função para aumentar o tamanho da matriz
                         AFND[stateHandlerCounter+2, 0] = "*"+(char)(65 + stateHandlerCounter);
                         stateHandlerCounter++;
-                        
                     }
                 }
             }
