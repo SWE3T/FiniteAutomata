@@ -20,26 +20,26 @@ namespace DETERMINADOR
         {
             string filename = @"Entrada.txt";
 
-            string[,] AFND = new string[6, 6]
-            {
-                { "57437", "s", "g", "u", "i", "b" },
-                { "S", "A, C", "H", " ", " ", " " },
-                { "A", " ", "B", " ", " ", " " },
-                { "B", " ", " ", " ", " ", " " },
-                { "C", " ", "D", " ", " ", " " },
-                { "D", " ", " ", "E", " ", " " },
-            };
-            
-            // string[,] AFND = new string[2, 1]
+            // string[,] AFND = new string[6, 6]
             // {
-            //     { "57437" },
-            //     { "S" },
+            //     { "57437", "s", "g", "u", "i", "r" },
+            //     { "S", "A, C", "H", " ", " ", " " },
+            //     { "A", " ", "B", " ", " ", " " },
+            //     { "B", " ", " ", " ", " ", " " },
+            //     { "C", " ", "D", " ", " ", " " },
+            //     { "D", " ", " ", "E", " ", " " },
             // };
+            
+            string[,] AFND = new string[2, 1]
+            {
+                { "57437" },
+                { "S" },
+            };
 
             var lines = File.ReadAllLines(filename);
 
             Console.WriteLine("\nLeitura do Arquivo: ");
-            int stateHandlerCounter = 4;
+            int stateHandlerCounter = 0;
             int newState = 0;
 
             for (var line = 0; line < lines.Length; line++)
@@ -74,16 +74,16 @@ namespace DETERMINADOR
                                     {
                                         string indexOfSymbol = string.Concat(temp.Where(c => !char.IsWhiteSpace(c)));
                                         int indexOfSymbolOnTable = indexOfSymbol.IndexOf(symbols[0].Replace(" ", String.Empty));
-                                        AFND[1, indexOfSymbolOnTable+1] = AFND[1, indexOfSymbolOnTable+1] + (char)(65 + stateHandlerCounter) + ", ";
                                         
                                         string[] State = symbols[1].Split(">");
+                                        AFND[1, indexOfSymbolOnTable+1] = AFND[1, indexOfSymbolOnTable+1] + (char)(65 + ((int)State[0].ToCharArray()[0] - 65) + stateHandlerCounter) + ", ";
                                         string temp2 = GetColumn(AFND, 0, 1);
 
-                                        if (temp2.Contains((char)(State[0].ToCharArray()[0] + stateHandlerCounter + 1)))
+                                        if (temp2.Contains((char)(State[0].ToCharArray()[0] + stateHandlerCounter)))
                                         { //Caso o estado já esteja na matriz
                                             string indexOfSymbol2 = temp2.Replace(" ", String.Empty);
                                             int indexOfSymbolOnTable2 = indexOfSymbol2.IndexOf((char)(State[0].ToCharArray()[0] + stateHandlerCounter + 1));
-                                            AFND[indexOfSymbolOnTable2+1, indexOfSymbolOnTable+1] = (char)(State[0].ToCharArray()[0] + stateHandlerCounter + 1) + ", ";
+                                            //AFND[indexOfSymbolOnTable2+1, indexOfSymbolOnTable+1] = (char)(State[0].ToCharArray()[0] + stateHandlerCounter + 1) + ", ";
                                         }
                                         else
                                         { //Caso o estado NÃO esteja na matriz
@@ -91,7 +91,7 @@ namespace DETERMINADOR
                                             AFND[AFND.GetLength(0)-1, 0] = (char)(State[0].ToCharArray()[0] + stateHandlerCounter + 1)+""; //Adiciona o estado na matriz
                                             string indexOfSymbol2 = temp2.Replace(" ", String.Empty);
                                             int indexOfSymbolOnTable2 = indexOfSymbol2.IndexOf((char)(State[0].ToCharArray()[0] + stateHandlerCounter + 1));
-                                            AFND[AFND.GetLength(0)-1, indexOfSymbolOnTable+1] = (char)(State[0].ToCharArray()[0] + stateHandlerCounter + 1) + ", ";
+                                            //AFND[AFND.GetLength(0)-1, indexOfSymbolOnTable+1] = (char)(State[0].ToCharArray()[0] + stateHandlerCounter + 1) + ", ";
                                         }
                                     }
                                     else
@@ -99,35 +99,39 @@ namespace DETERMINADOR
                                         Console.WriteLine("Preciso adicionar o simbolo na matriz");
                                         ResizeArray(ref AFND, AFND.GetLength(0), AFND.GetLength(1)+1); //Função para aumentar o tamanho da matriz
 
-                                        string indexOfSymbol = string.Concat(temp.Where(c => !char.IsWhiteSpace(c)));
-                                        int indexOfSymbolOnTable = indexOfSymbol.IndexOf(symbols[0].Replace(" ", String.Empty));
+                                        // string indexOfSymbol = string.Concat(temp.Where(c => !char.IsWhiteSpace(c)));
+                                        // int indexOfSymbolOnTable = indexOfSymbol.IndexOf(symbols[0].Replace(" ", String.Empty));
                                       
                                         AFND[0, AFND.GetLength(1)-1] = symbols[0].Replace(" ", String.Empty) + ""; //Adiciona o Simbolo novo no topo da matriz
-                                        AFND[1, AFND.GetLength(1)-1] = (char)(65 + stateHandlerCounter) + ", ";
-                                        
                                         string[] State = symbols[1].Split(">");
+
+                                        AFND[1, AFND.GetLength(1)-1] = (char)(65 + ((int)State[0].ToCharArray()[0] - 65) + stateHandlerCounter) + ", ";
                                         string temp2 = GetColumn(AFND, 0, 1);
 
-                                        if (temp2.Contains((char)(State[0].ToCharArray()[0] + stateHandlerCounter + 1)))
+                                        if (temp2.Contains((char)(State[0].ToCharArray()[0] + stateHandlerCounter)))
                                         { //Caso o estado já esteja na matriz
+                                            Console.WriteLine("A matriz Contem o estado");
+
                                             string indexOfSymbol2 = temp2.Replace(" ", String.Empty);
-                                            int indexOfSymbolOnTable2 = indexOfSymbol2.IndexOf((char)(State[0].ToCharArray()[0] + stateHandlerCounter + 1));
-                                            AFND[indexOfSymbolOnTable2+1, indexOfSymbolOnTable+1] = (char)(State[0].ToCharArray()[0] + stateHandlerCounter + 1) + ", ";
+                                            int indexOfSymbolOnTable2 = indexOfSymbol2.IndexOf((char)(State[0].ToCharArray()[0] + stateHandlerCounter));
+                                            //AFND[indexOfSymbolOnTable2+1, AFND.GetLength(1)-1] = (char)(State[0].ToCharArray()[0] + stateHandlerCounter) + ", ";
                                         }
                                         else
                                         { //Caso o estado NÃO esteja na matriz
+                                            Console.WriteLine("A matriz Nõa Contem o estado");
+
                                             ResizeArray(ref AFND, AFND.GetLength(0)+1, AFND.GetLength(1)); //Função para aumentar o tamanho da matriz
-                                            AFND[AFND.GetLength(0)-1, 0] = (char)(State[0].ToCharArray()[0] + stateHandlerCounter + 1)+""; //Adiciona o estado na matriz
+                                            AFND[AFND.GetLength(0)-1, 0] = (char)(State[0].ToCharArray()[0] + stateHandlerCounter)+""; //Adiciona o estado na matriz
                                             string indexOfSymbol2 = temp2.Replace(" ", String.Empty);
-                                            int indexOfSymbolOnTable2 = indexOfSymbol2.IndexOf((char)(State[0].ToCharArray()[0] + stateHandlerCounter + 1));
-                                            AFND[AFND.GetLength(0)-1, indexOfSymbolOnTable+1] = (char)(State[0].ToCharArray()[0] + stateHandlerCounter + 1) + ", ";
+                                            //int indexOfSymbolOnTable2 = indexOfSymbol2.IndexOf((char)(State[0].ToCharArray()[0] + stateHandlerCounter + 1));
+                                            //AFND[AFND.GetLength(0)-1,AFND.GetLength(1)-1] = (char)(State[0].ToCharArray()[0] + stateHandlerCounter) + ", ";
                                         }
                                     }
                                 }
                             }
                             if (nextStates[1].Contains("ε"))
                             {
-                                AFND[stateHandlerCounter+2, 0] = "*" + AFND[stateHandlerCounter+2, 0];
+                                AFND[stateHandlerCounter+1, 0] = "*" + AFND[stateHandlerCounter+1, 0];
                             }
                         }
 
