@@ -22,7 +22,7 @@ namespace DETERMINADOR
 
             string[,] AFND = new string[6, 6]
             {
-                { "57437", "s", "e", "c", "a", "b" },
+                { "57437", "s", "g", "u", "i", "b" },
                 { "S", "A, C", "H", " ", " ", " " },
                 { "A", " ", "B", " ", " ", " " },
                 { "B", " ", " ", " ", " ", " " },
@@ -58,7 +58,6 @@ namespace DETERMINADOR
                             Console.WriteLine("Sequência da gramática");
                         }
 
-
                         else
                         { //Começo da gramática
                             Console.WriteLine("Começo da gramática");
@@ -66,60 +65,75 @@ namespace DETERMINADOR
                             string[] states = nextStates[1].Split("|");
                             foreach (var item in states)
                             {
+                                Console.WriteLine(item);
                                 string[] symbols = item.Split("<");
-                                if (symbols.Length >= 1) {
+                                //Console.WriteLine(symbols[0]);
+                                if (item.Contains("<")) { 
                                     string temp = GetRow(AFND, 0, 1);
                                     if (temp.Contains(symbols[0]))
                                     {
-                                        Console.WriteLine(symbols[1]);
-                                        Console.WriteLine("A tabela já contém esse símbolo");
                                         string indexOfSymbol = string.Concat(temp.Where(c => !char.IsWhiteSpace(c)));
                                         int indexOfSymbolOnTable = indexOfSymbol.IndexOf(symbols[0].Replace(" ", String.Empty));
                                         AFND[1, indexOfSymbolOnTable+1] = AFND[1, indexOfSymbolOnTable+1] + (char)(65 + stateHandlerCounter) + ", ";
                                         
                                         string[] State = symbols[1].Split(">");
                                         string temp2 = GetColumn(AFND, 0, 1);
-                                        
+
                                         if (temp2.Contains((char)(State[0].ToCharArray()[0] + stateHandlerCounter + 1)))
-                                        {
-                                            Console.WriteLine(temp2.Replace(" ", String.Empty));
+                                        { //Caso o estado já esteja na matriz
                                             string indexOfSymbol2 = temp2.Replace(" ", String.Empty);
                                             int indexOfSymbolOnTable2 = indexOfSymbol2.IndexOf((char)(State[0].ToCharArray()[0] + stateHandlerCounter + 1));
-                                            Console.WriteLine(indexOfSymbolOnTable2);
-                                            Console.WriteLine((char)(State[0].ToCharArray()[0] + stateHandlerCounter + 1));
-                                            
                                             AFND[indexOfSymbolOnTable2+1, indexOfSymbolOnTable+1] = (char)(State[0].ToCharArray()[0] + stateHandlerCounter + 1) + ", ";
-                                            //coloca o simbolo no mesmo estado
                                         }
                                         else
-                                        {
-                                           ResizeArray(ref AFND, AFND.GetLength(0)+1, AFND.GetLength(1)); //Função para aumentar o tamanho da matriz
-                                           AFND[stateHandlerCounter+2, 0] = (char)(State[0].ToCharArray()[0] + stateHandlerCounter + 1)+"";
+                                        { //Caso o estado NÃO esteja na matriz
+                                            ResizeArray(ref AFND, AFND.GetLength(0)+1, AFND.GetLength(1)); //Função para aumentar o tamanho da matriz
+                                            AFND[AFND.GetLength(0)-1, 0] = (char)(State[0].ToCharArray()[0] + stateHandlerCounter + 1)+""; //Adiciona o estado na matriz
+                                            string indexOfSymbol2 = temp2.Replace(" ", String.Empty);
+                                            int indexOfSymbolOnTable2 = indexOfSymbol2.IndexOf((char)(State[0].ToCharArray()[0] + stateHandlerCounter + 1));
+                                            AFND[AFND.GetLength(0)-1, indexOfSymbolOnTable+1] = (char)(State[0].ToCharArray()[0] + stateHandlerCounter + 1) + ", ";
                                         }
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine("Preciso adicionar o simbolo na matriz");
+                                        ResizeArray(ref AFND, AFND.GetLength(0), AFND.GetLength(1)+1); //Função para aumentar o tamanho da matriz
 
+                                        string indexOfSymbol = string.Concat(temp.Where(c => !char.IsWhiteSpace(c)));
+                                        int indexOfSymbolOnTable = indexOfSymbol.IndexOf(symbols[0].Replace(" ", String.Empty));
+                                      
+                                        AFND[0, AFND.GetLength(1)-1] = symbols[0].Replace(" ", String.Empty) + ""; //Adiciona o Simbolo novo no topo da matriz
+                                        AFND[1, AFND.GetLength(1)-1] = (char)(65 + stateHandlerCounter) + ", ";
+                                        
+                                        string[] State = symbols[1].Split(">");
+                                        string temp2 = GetColumn(AFND, 0, 1);
 
-                                        // if (nextStates[1].Contains("ε"))
-                                        // {
-                                        //     AFND[stateHandlerCounter+2, 0] = "*" + (char)(65 + stateHandlerCounter);
-                                        // }
-                                        // else
-                                        // {
-                                        //     AFND[stateHandlerCounter+2, 0] = (char)(65 + stateHandlerCounter) + "";
-                                        // }
-
+                                        if (temp2.Contains((char)(State[0].ToCharArray()[0] + stateHandlerCounter + 1)))
+                                        { //Caso o estado já esteja na matriz
+                                            string indexOfSymbol2 = temp2.Replace(" ", String.Empty);
+                                            int indexOfSymbolOnTable2 = indexOfSymbol2.IndexOf((char)(State[0].ToCharArray()[0] + stateHandlerCounter + 1));
+                                            AFND[indexOfSymbolOnTable2+1, indexOfSymbolOnTable+1] = (char)(State[0].ToCharArray()[0] + stateHandlerCounter + 1) + ", ";
+                                        }
+                                        else
+                                        { //Caso o estado NÃO esteja na matriz
+                                            ResizeArray(ref AFND, AFND.GetLength(0)+1, AFND.GetLength(1)); //Função para aumentar o tamanho da matriz
+                                            AFND[AFND.GetLength(0)-1, 0] = (char)(State[0].ToCharArray()[0] + stateHandlerCounter + 1)+""; //Adiciona o estado na matriz
+                                            string indexOfSymbol2 = temp2.Replace(" ", String.Empty);
+                                            int indexOfSymbolOnTable2 = indexOfSymbol2.IndexOf((char)(State[0].ToCharArray()[0] + stateHandlerCounter + 1));
+                                            AFND[AFND.GetLength(0)-1, indexOfSymbolOnTable+1] = (char)(State[0].ToCharArray()[0] + stateHandlerCounter + 1) + ", ";
+                                        }
                                     }
                                 }
+                            }
+                            if (nextStates[1].Contains("ε"))
+                            {
+                                AFND[stateHandlerCounter+2, 0] = "*" + AFND[stateHandlerCounter+2, 0];
                             }
                         }
 
                         //ε 
                         
-                        // int s;
-                        // char i= '2';
-                        // s = (int) i;
-
-                        //split por |; para ter o estado alterado e
-                        //replace  <X> por ' '; para separar os simbolos
+                     
                     }
                     else
                     { //Parte de uma palavra reservada
