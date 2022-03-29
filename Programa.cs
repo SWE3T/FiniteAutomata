@@ -20,26 +20,27 @@ namespace DETERMINADOR
         {
             string filename = @"Entrada.txt";
 
-            // string[,] AFND = new string[6, 6]
-            // {
-            //     { "57437", "s", "e", "n", "ã", "o" },
-            //     { "S", "A, C", "H", " ", "K", " " },
-            //     { "A", " ", "B", " ", " ", " " },
-            //     { "B", " ", " ", " ", " ", " " },
-            //     { "C", " ", "D", " ", " ", " " },
-            //     { "D", " ", " ", "E", " ", " " },
-            // };
-            
-            string[,] AFND = new string[2, 1]
+            string[,] AFND = new string[6, 6]
             {
-                { "57437" },
-                { "S" },
+                { "57437", "s", "e", "c", "a", "b" },
+                { "S", "A, C", "H", " ", " ", " " },
+                { "A", " ", "B", " ", " ", " " },
+                { "B", " ", " ", " ", " ", " " },
+                { "C", " ", "D", " ", " ", " " },
+                { "D", " ", " ", "E", " ", " " },
             };
+            
+            // string[,] AFND = new string[2, 1]
+            // {
+            //     { "57437" },
+            //     { "S" },
+            // };
 
             var lines = File.ReadAllLines(filename);
 
             Console.WriteLine("\nLeitura do Arquivo: ");
-            int stateHandlerCounter = 0;
+            int stateHandlerCounter = 4;
+            int newState = 0;
 
             for (var line = 0; line < lines.Length; line++)
             {
@@ -50,8 +51,72 @@ namespace DETERMINADOR
                     if (lines[line].Split("::=").Length == 2)
                     { //Parte de um estado
                         Console.WriteLine("Atribuição de estado");
-                        //Esta parte está meio confusa ainda, vou resolvendo nas próximas semanas
-                        //procura no AFND se existe o estado => se sim, adiciona o proximo estado em S e cria um novo estado para o segundo simbolo da palavra, se não, cria um novo estado
+
+                        string[] nextStates = lines[line].Split("::=");
+                     
+                        if (!nextStates[0].Contains("S")){ //Sequência da gramática
+                            Console.WriteLine("Sequência da gramática");
+                        }
+
+
+                        else
+                        { //Começo da gramática
+                            Console.WriteLine("Começo da gramática");
+
+                            string[] states = nextStates[1].Split("|");
+                            foreach (var item in states)
+                            {
+                                string[] symbols = item.Split("<");
+                                if (symbols.Length >= 1) {
+                                    string temp = GetRow(AFND, 0, 1);
+                                    if (temp.Contains(symbols[0]))
+                                    {
+                                        Console.WriteLine(symbols[1]);
+                                        Console.WriteLine("A tabela já contém esse símbolo");
+                                        string indexOfSymbol = string.Concat(temp.Where(c => !char.IsWhiteSpace(c)));
+                                        int indexOfSymbolOnTable = indexOfSymbol.IndexOf(symbols[0].Replace(" ", String.Empty));
+                                        AFND[1, indexOfSymbolOnTable+1] = AFND[1, indexOfSymbolOnTable+1] + (char)(65 + stateHandlerCounter) + ", ";
+                                        
+                                        string[] State = symbols[1].Split(">");
+                                        string temp2 = GetColumn(AFND, 0, 1);
+                                        
+                                        if (temp2.Contains((char)(State[0].ToCharArray()[0] + stateHandlerCounter + 1)))
+                                        {
+                                            Console.WriteLine(temp2.Replace(" ", String.Empty));
+                                            string indexOfSymbol2 = temp2.Replace(" ", String.Empty);
+                                            int indexOfSymbolOnTable2 = indexOfSymbol2.IndexOf((char)(State[0].ToCharArray()[0] + stateHandlerCounter + 1));
+                                            Console.WriteLine(indexOfSymbolOnTable2);
+                                            Console.WriteLine((char)(State[0].ToCharArray()[0] + stateHandlerCounter + 1));
+                                            
+                                            AFND[indexOfSymbolOnTable2+1, indexOfSymbolOnTable+1] = (char)(State[0].ToCharArray()[0] + stateHandlerCounter + 1) + ", ";
+                                            //coloca o simbolo no mesmo estado
+                                        }
+                                        else
+                                        {
+                                           ResizeArray(ref AFND, AFND.GetLength(0)+1, AFND.GetLength(1)); //Função para aumentar o tamanho da matriz
+                                           AFND[stateHandlerCounter+2, 0] = (char)(State[0].ToCharArray()[0] + stateHandlerCounter + 1)+"";
+                                        }
+
+
+                                        // if (nextStates[1].Contains("ε"))
+                                        // {
+                                        //     AFND[stateHandlerCounter+2, 0] = "*" + (char)(65 + stateHandlerCounter);
+                                        // }
+                                        // else
+                                        // {
+                                        //     AFND[stateHandlerCounter+2, 0] = (char)(65 + stateHandlerCounter) + "";
+                                        // }
+
+                                    }
+                                }
+                            }
+                        }
+
+                        //ε 
+                        
+                        // int s;
+                        // char i= '2';
+                        // s = (int) i;
 
                         //split por |; para ter o estado alterado e
                         //replace  <X> por ' '; para separar os simbolos
@@ -69,7 +134,7 @@ namespace DETERMINADOR
 
                             if (temp.Contains(lines[line][symbol])) //Se o simbolo já existe na matrix
                             {
-                                Console.WriteLine("O simbolo já existe na tabela");
+                                //Console.WriteLine("O simbolo já existe na tabela"); //Debug
                                 string indexOfSymbol = string.Concat(temp.Where(c => !char.IsWhiteSpace(c)));
                                 int indexOfSymbolOnTable = indexOfSymbol.IndexOf((lines[line][symbol]));
 
@@ -80,26 +145,26 @@ namespace DETERMINADOR
                                     stateHandlerCounter++;
                                     AFND[stateHandlerCounter+1, indexOfSymbolOnTable+1] = AFND[stateHandlerCounter+1, indexOfSymbolOnTable+1] + (char)(65 + stateHandlerCounter) + ", ";
                                 }
-                                  else
-                                  {
+                                else
+                                {
                                     AFND[1, indexOfSymbolOnTable+1] = AFND[1, indexOfSymbolOnTable+1] + (char)(65 + stateHandlerCounter) + ", ";
-                                  }
+                                }
                                
                             }
                             else
                             {
-                                Console.WriteLine("Não existe este simbolo na tabela");
+                                //Console.WriteLine("Não existe este simbolo na tabela"); //Debug
                                 ResizeArray(ref AFND, AFND.GetLength(0), AFND.GetLength(1)+1); //Função para aumentar o tamanho da matriz
                                 AFND[0, AFND.GetLength(1)-1] = lines[line][symbol]+""; //Adiciona o simbolo no topo da matriz
                             
-                                if (symbol != 0) //Caso seja o primeiro simbolo da palavra 
+                                if (symbol != 0) //Caso NÂO seja o primeiro simbolo da palavra 
                                 {
                                     ResizeArray(ref AFND, AFND.GetLength(0)+1, AFND.GetLength(1)); //Função para aumentar o tamanho da matriz
                                     AFND[stateHandlerCounter+2, 0] = (char)(65 + stateHandlerCounter)+"";
                                     stateHandlerCounter++;
                                     AFND[stateHandlerCounter+1, AFND.GetLength(1)-1] = AFND[stateHandlerCounter+1, AFND.GetLength(1)-1] + (char)(65 + stateHandlerCounter) + ", ";
                                 }
-                                else
+                                else //É o primeiro símbolo da palavra
                                 {
                                     AFND[1, AFND.GetLength(1)-1] = AFND[1, AFND.GetLength(1)-1] + (char)(65 + stateHandlerCounter) + ", ";
                                 }
@@ -112,7 +177,18 @@ namespace DETERMINADOR
                     }
                 }
             }
+            PrintAF(ref AFND);
+         
+        }
 
+        private static void determinize()
+        {
+            Console.WriteLine("Função De Determinação");
+        }
+
+
+        private static void PrintAF(ref string[,] AFND)
+        {
             Console.WriteLine("Printing AFND: ");
             for (int i = 0; i <= AFND.GetUpperBound(0); i++)
             {
@@ -125,10 +201,6 @@ namespace DETERMINADOR
             }
         }
 
-        private static void determinize()
-        {
-            Console.WriteLine("Função De Determinação");
-        }
 
         private static void ResizeArray(ref string[,] Arr, int x, int y)
         {
@@ -140,11 +212,19 @@ namespace DETERMINADOR
             Arr = _arr;
         }
 
-        static string GetRow(string[,] matrix, int rowNumber, int trueORfalse)
+        static string GetRow(string[,] matrix, int rowNumber, int start)
         {
             string result = " ";
-            for (var i = trueORfalse; i < matrix.GetLength(1); i++)
+            for (var i = start; i < matrix.GetLength(1); i++)
                 result = result + " " + matrix[rowNumber, i];
+            return result;
+        }
+       
+        static string GetColumn(string[,] matrix, int ColumnNumber, int start)
+        {
+            string result = " ";
+            for (var i = start; i < matrix.GetLength(0); i++)
+                result = result + " " + matrix[i, ColumnNumber];
             return result;
         }
     }

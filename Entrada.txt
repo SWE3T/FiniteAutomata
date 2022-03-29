@@ -1,5 +1,2 @@
-se
-senão
-end
-<S> ::= a<A> | e<A> | i<A> | o<A> | u<A>
-<A> ::= a<A> | e<A> | i<A> | o<A> | u<A> | ε
+<S> ::= a<A> | b<A> | c<A> 
+<A> ::= a<A> | b<A> | c<A>
