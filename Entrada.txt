@@ -1,2 +1,9 @@
-<S> ::= a<A> | b<B> |  ε | c<C> | a<B> |
-<A> ::= a<A> | e<A> | c<A> | o<A> | b<A> | ε
+se
+senao
+end
+
+<S> ::= a<A> | b<A> | c<A> |
+<A> ::= a<A> | b<A> | c<A> | ε
+
+<S> ::= u<A> | l<A> 
+<A> ::= u<A> | l<A> | ε
