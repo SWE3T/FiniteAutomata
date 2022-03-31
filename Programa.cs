@@ -47,8 +47,7 @@ namespace DETERMINADOR {
                 if (item.Contains("<")) {
                   string temp = GetRow(AFND, 0, 1);
                   if (temp.Contains(symbols[0])) {
-                    string indexOfSymbol = string.Concat(
-                    temp.Where(c =>!char.IsWhiteSpace(c)));
+                    string indexOfSymbol = string.Concat(temp.Where(c =>!char.IsWhiteSpace(c)));
                     int indexOfSymbolOnTable = indexOfSymbol.IndexOf(symbols[0].Replace(" ", String.Empty));
 
                     string[] State = symbols[1].Split(">");
@@ -144,11 +143,11 @@ namespace DETERMINADOR {
                 string indexOfSymbol = string.Concat(temp.Where(c =>!char.IsWhiteSpace(c)));
                 int indexOfSymbolOnTable = indexOfSymbol.IndexOf((lines[line][symbol]));
 
-                if (symbol != 0) //Caso seja o primeiro simbolo da palavra
+                if (symbol != 0) //Caso NÃO seja o primeiro simbolo da palavra
                 {
                   ResizeArray(ref AFND, AFND.GetLength(0) + 1, AFND.GetLength(1)); //Função para aumentar o tamanho da matriz
                   AFND[stateHandlerCounter + 2, 0] = (char)(65 + stateHandlerCounter) + "";
-                  AFND[stateHandlerCounter + 1, indexOfSymbolOnTable + 1] = AFND[stateHandlerCounter + 1, indexOfSymbolOnTable + 1] + (char)(65 + stateHandlerCounter) + ", ";
+                  AFND[stateHandlerCounter + 2, indexOfSymbolOnTable + 1] = AFND[stateHandlerCounter + 2, indexOfSymbolOnTable + 1] + (char)(65 + (stateHandlerCounter+1)) + ", ";
                   stateHandlerCounter++;
                 }
                 else {
@@ -180,10 +179,60 @@ namespace DETERMINADOR {
         }
       }
       PrintAF(ref AFND);
+
+      Console.WriteLine("Determinização");
+
+      determinize(ref AFND);
+      PrintAF(ref AFND);
     }
 
-    private static void determinize() {
-      Console.WriteLine("Função De Determinação");
+    private static void determinize(ref string[, ] AFND) {
+      bool changes = false;
+      
+      for (int i = 1; i < AFND.GetLength(0); i++) {
+        for (int j = 1; j < AFND.GetLength(1); j++) {
+          if (AFND[i,j] != null && AFND[i,j].Contains(",") && !(AFND[i,j].Contains("[")))
+          {
+            string states2 = AFND[i, j].Replace(" ", String.Empty);
+            string[] states = (states2.Split(','));
+            if (states.Length >= 3)
+            {
+                AFND[i,j] = "[" + AFND[i,j].Remove(AFND[i,j].Length - 2) + "]";
+                ResizeArray(ref AFND, AFND.GetLength(0) + 1, AFND.GetLength(1)); //Função para aumentar o tamanho da matriz
+                //newStates = AFND[i,j].Remove(AFND[i,j].Length - 2);
+                AFND[AFND.GetLength(0)-1, 0] = AFND[i,j];
+
+                foreach (var state in states)
+                {
+                    if (!(state == states.Last()))
+                    {
+                        string temp = GetColumn(AFND, 0, 1);
+                        string indexOfState1 = temp.Replace(" ", String.Empty);
+                        string indexOfState = indexOfState1.Replace("*", String.Empty);
+                        int indexOfStateOnTable = indexOfState.IndexOf(state);
+
+                        for (var symbol = 1; symbol < AFND.GetLength(1); symbol++)
+                        {
+                            AFND[AFND.GetLength(0)-1, symbol] = AFND[AFND.GetLength(0)-1, symbol] + AFND[indexOfStateOnTable+1, symbol]; //Console.Write(AFND[indexOfStateOnTable+1, symbol]);
+                        }             
+
+                        //AFND[indexOfStateOnTable, 0] = "*" + AFND[indexOfStateOnTable, 0];
+                        //tem que achar o index e fazer um loop para adicionar em AFND[AFND.GetLength(0)-1, i] = AFND[index do estado, i];
+                        //tem que chcar se algum é estado final
+                    }
+                }
+                Console.Write(i);
+                Console.WriteLine(", " + j);
+            }
+            changes = false;
+          }
+        }
+      }
+
+      if (changes)
+      { //Recursividade para percorer a matriz até não haver mais mudanças.
+          determinize(ref AFND);
+      }
     }
 
     private static void PrintAF(ref string[, ] AFND) {
