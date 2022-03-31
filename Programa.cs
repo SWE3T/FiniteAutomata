@@ -36,31 +36,36 @@ namespace DETERMINADOR {
         {
           Console.WriteLine(lines[line]); // Printa a linha
 
-          if (lines[line].Split("::=").Length == 2) { //Parte de um estado
+          if (lines[line].Split("::=").Length == 2) { //Parte de uma gramática
 
             string[] nextStates = lines[line].Split("::=");
 
             if (!nextStates[0].Contains("S")) { //Sequência da gramática
               string[] states = nextStates[1].Split("|");
               foreach(var item in states) {
-                string[] symbols = item.Split("<");
                 if (item.Contains("<")) {
-                  string temp = GetRow(AFND, 0, 1);
+                string[] symbols = item.Split("<");
+                  string temp = GetRow(AFND, 0, 1); 
                   if (temp.Contains(symbols[0])) {
                     string indexOfSymbol = string.Concat(temp.Where(c =>!char.IsWhiteSpace(c)));
                     int indexOfSymbolOnTable = indexOfSymbol.IndexOf(symbols[0].Replace(" ", String.Empty));
 
                     string[] State = symbols[1].Split(">");
+                  
+                    
                     string temp2 = GetColumn(AFND, 0, 1);
-                    string indexOfSymbol2 = string.Concat(temp2.Where(c =>!char.IsWhiteSpace(c)));
-                    int indexOfSymbolOnTable2 = indexOfSymbol2.IndexOf(State[0].Replace(" ", String.Empty));
-
-                    AFND[indexOfSymbolOnTable2 + stateHandlerCounter, indexOfSymbolOnTable + 1] = AFND[indexOfSymbolOnTable2 + stateHandlerCounter, indexOfSymbolOnTable + 1] + (char)(65 + ((int) State[0].ToCharArray()[0] - 65) + (stateHandlerCounter - 1)) + ", ";
+                    
 
                     if (!temp2.Contains((char)(State[0].ToCharArray()[0] + (stateHandlerCounter - 1)))) { //Caso o estado NÃO esteja na matriz
                       ResizeArray(ref AFND, AFND.GetLength(0) + 1, AFND.GetLength(1)); //Função para aumentar o tamanho da matriz
                       AFND[AFND.GetLength(0) - 1, 0] = (char)(State[0].ToCharArray()[0] + (stateHandlerCounter - 1)) + ""; //Adiciona o estado na matriz
                     }
+
+                    temp2 = GetColumn(AFND, 0, 1);
+                    string indexOfSymbol2 = temp2.Replace(" ", String.Empty);
+                    indexOfSymbol2 = indexOfSymbol2.Replace("*", String.Empty);
+                    int indexOfSymbolOnTable2 = indexOfSymbol2.IndexOf(State[0].Replace("*", String.Empty));
+                    AFND[(indexOfSymbolOnTable2+1) + (stateHandlerCounter-1), indexOfSymbolOnTable + 1] = AFND[indexOfSymbolOnTable2+1 + (stateHandlerCounter-1), indexOfSymbolOnTable + 1] + (char)(65 + ((int) State[0].ToCharArray()[0] - 65) + (stateHandlerCounter - 1)) + ", ";
                   }
                   else {
                     ResizeArray(ref AFND, AFND.GetLength(0), AFND.GetLength(1) + 1); //Função para aumentar o tamanho da matriz
@@ -88,9 +93,8 @@ namespace DETERMINADOR {
                 string[] symbols = item.Split("<");
                 if (item.Contains("<")) {
                   string temp = GetRow(AFND, 0, 1);
-                  if (temp.Contains(symbols[0])) {
-                    string indexOfSymbol = string.Concat(
-                    temp.Where(c =>!char.IsWhiteSpace(c)));
+                  if (temp.Contains(symbols[0])) { //Caso a tabela já contém o simbolo
+                    string indexOfSymbol = string.Concat(temp.Where(c =>!char.IsWhiteSpace(c)));
                     int indexOfSymbolOnTable = indexOfSymbol.IndexOf(symbols[0].Replace(" ", String.Empty));
 
                     string[] State = symbols[1].Split(">");
@@ -100,12 +104,9 @@ namespace DETERMINADOR {
                     if (!temp2.Contains((char)(State[0].ToCharArray()[0] + (stateHandlerCounter - 1)))) { //Caso o estado NÃO esteja na matriz
                       ResizeArray(ref AFND, AFND.GetLength(0) + 1, AFND.GetLength(1)); //Função para aumentar o tamanho da matriz
                       AFND[AFND.GetLength(0) - 1, 0] = (char)(State[0].ToCharArray()[0] + (stateHandlerCounter - 1)) + ""; //Adiciona o estado na matriz
-                      string indexOfSymbol2 = temp2.Replace(" ", String.Empty);
-                      int indexOfSymbolOnTable2 = indexOfSymbol2.IndexOf((char)(
-                      State[0].ToCharArray()[0] + (stateHandlerCounter - 1)));
                     }
                   }
-                  else {
+                  else { // Caso a matriz não contenha o simbolo
                     ResizeArray(ref AFND, AFND.GetLength(0), AFND.GetLength(1) + 1); //Função para aumentar o tamanho da matriz
 
                     AFND[0, AFND.GetLength(1) - 1] = symbols[0].Replace(" ", String.Empty) + ""; //Adiciona o Simbolo novo no topo da matriz
@@ -179,7 +180,7 @@ namespace DETERMINADOR {
         }
       }
       PrintAF(ref AFND);
-
+      Console.WriteLine();  
       Console.WriteLine("Determinização");
 
       determinize(ref AFND);
@@ -210,6 +211,13 @@ namespace DETERMINADOR {
                         string indexOfState1 = temp.Replace(" ", String.Empty);
                         string indexOfState = indexOfState1.Replace("*", String.Empty);
                         int indexOfStateOnTable = indexOfState.IndexOf(state);
+                        
+                        Console.WriteLine(indexOfStateOnTable);
+                        if (AFND[indexOfStateOnTable+1, 0].Contains("*"))
+                        { //Passa o estado final para o novo estado criado;
+                            Console.WriteLine(AFND[AFND.GetLength(0)-1, 0]);
+                            AFND[AFND.GetLength(0)-1, 0] = "*" + AFND[AFND.GetLength(0)-1, 0];
+                        }
 
                         for (var symbol = 1; symbol < AFND.GetLength(1); symbol++)
                         {
@@ -221,8 +229,6 @@ namespace DETERMINADOR {
                         //tem que chcar se algum é estado final
                     }
                 }
-                Console.Write(i);
-                Console.WriteLine(", " + j);
             }
             changes = false;
           }
@@ -236,12 +242,12 @@ namespace DETERMINADOR {
     }
 
     private static void PrintAF(ref string[, ] AFND) {
+      Console.WriteLine();
       Console.WriteLine("Imprimindo o Autômato: ");
       for (int i = 0; i <= AFND.GetUpperBound(0); i++) {
         for (int j = 0; j <= AFND.GetUpperBound(1); j++) {
           Console.Write(AFND[i, j] + "\t|");
         }
-
         Console.WriteLine();
       }
     }
